@@ -6,9 +6,11 @@
 
 #include "DBManager.h"
 #include "KDTree.h"
+#include "BaseComporator.h"
 
 mongocxx::instance inst{};
 mongocxx::client conn{mongocxx::uri{}};
+
 
 class TestKDTree: public::testing::Test{
 protected:
@@ -36,7 +38,7 @@ void TestKDTree::SetUp(){
 
 	collection = conn["testdb"]["testcollection"];
 	db_manager = new DBManager(collection);
-	kd_tree = new KDTree("...", db_manager);
+	kd_tree = new KDTree("...", db_manager, 3);
 }
 
 void TestKDTree::TearDown(){
@@ -107,7 +109,7 @@ TEST(KDTreeTest, InitTest){
 	DBManager *db_manager;
 	
 	EXPECT_NO_THROW(db_manager = new DBManager(collection));
-	EXPECT_NO_THROW(KDTree kd_tree("...", db_manager));
+	EXPECT_NO_THROW(KDTree kd_tree("...", db_manager, 3));
 
 	delete db_manager;
 }
@@ -115,78 +117,22 @@ TEST(KDTreeTest, InitTest){
 
 TEST_F(TestKDTree, AddTest){
 	for(auto &key : test_keys){
-		EXPECT_NO_THROW(kd_tree->add(key, std::to_string(key[0])));
+		BaseComporator cmp = BaseComporator();
+		EXPECT_NO_THROW(kd_tree->add(key, std::to_string(key[0]), &cmp));
 	}
 }
-/*
-TEST_F(TestKDTree, RangeSearchTest){
-
-	for(auto &key : test_keys){
-		EXPECT_NO_THROW(kd_tree->add(key, std::to_string(key[0])));
-	}
-
-	//kd_tree->add(std::vector<double>{0, 0, 0, 0}, "0");
-	//kd_tree->add(std::vector<double>{0.5, 0.8, 0.3, 0.4}, "0.5");
-	//kd_tree->add(std::vector<double>{0.2, 0.1, 0.2, 0.3}, "0.2");
-
-	std::vector<std::string> kd_tree_range_search_answers;
-	EXPECT_NO_THROW(kd_tree_range_search_answers = kd_tree->range_search(test_keys[0], test_keys[1]));
-
-	for(auto &e : kd_tree_range_search_answers){
-		std::cout << e << " ";
-	}
-	std::cout << "\n\n";
-
-	for(auto &e : range_search_test_data){
-		std::cout << e << " ";
-	}
-	std::cout << "\n";
-	/*
-	while(std::next_permutation(kd_tree_range_search_answers.begin(), kd_tree_range_search_answers.end())){
-    	if(range_search_test_data == kd_tree_range_search_answers){
-    		SUCCEED();
-    	}
-    }
-
-    ADD_FAILURE();*/
-
-    //EXPECT_NO_THROW(kd_tree->add(key, std::to_string(key[0])));
-
-    /*std::vector<std::string> range_search_answers;
-    inFile.open("/home/awerkiler/progs/Mail/old1/AdvancedC ++/Project/8/Tests/range_search_data.txt"); //TODO
-
-	while(!inFile.eof()){
-		std::string x;
-		inFile >> x;
-		range_search_answers.push_back(x);
-	}
-
-	
-    std::vector<std::string> kd_tree_range_search_answers;
-    EXPECT_NO_THROW(kd_tree_range_search_answers = kd_tree->range_search);
-
-    while(std::next_permutation(range_search_answers.begin(), range_search_answers.end())){
-    	if(range_search_answers == )
-    }
-
-	for(auto &e : range_search_answers){
-    	for(int i = 0; i < 45; ++i){
-    		std::cout << e[i] << " ";
-    	}
-    	std::cout << "\n";
-    }
-
-	inFile.close();
-}*/
 
 TEST_F(TestKDTree, NeighborSearch){
+	BaseComporator cmp = BaseComporator();
+	BaseMetrificator mth = BaseMetrificator();
+
 	for(auto &key : test_keys){
-		EXPECT_NO_THROW(kd_tree->add(key, std::to_string(key[0])));
+		EXPECT_NO_THROW(kd_tree->add(key, std::to_string(key[0]), &cmp));
 	}
 
 	for(size_t c = 0; c < neighbour_search_tests.size(); ++c){
 		std::string kd_tree_answer;
-		EXPECT_NO_THROW(kd_tree_answer = kd_tree->neighbor_search(neighbour_search_tests[c])[0]);
+		EXPECT_NO_THROW(kd_tree_answer = kd_tree->neighbor_search(neighbour_search_tests[c], &cmp, &mth)[0]);
 		EXPECT_EQ(kd_tree_answer, neighbour_search_answers[c]);
 	}
 }

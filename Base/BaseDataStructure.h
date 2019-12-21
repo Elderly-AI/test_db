@@ -7,7 +7,7 @@
 
 class BaseDataStructure: public BaseContainer{ 
 public:
-	BaseDataStructure(const std::string &id, const BaseDBManager *db_manager_);
+	BaseDataStructure(const std::string &id, BaseDBManager *db_manager_);
 
-	const BaseDBManager *db_manager;
+	BaseDBManager *db_manager;
 };

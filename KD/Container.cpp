@@ -13,43 +13,64 @@ Container::Container(const std::string &id_):
 
 void Container::save(bsoncxx::builder::basic::sub_document &document){
 
-    auto key_array_builder = bsoncxx::builder::basic::array{};
+    auto keys_array_builder = bsoncxx::builder::basic::array{};
+    auto data_array_builder = bsoncxx::builder::basic::array{};
+    auto containers_id_array_builder = bsoncxx::builder::basic::array{};
 
-    for (auto &e : key) {
-       key_array_builder.append(e);
+    for(auto &pair : data){
+        auto key_array_builder = bsoncxx::builder::basic::array{};
+
+        for(auto &e : pair.first){
+            key_array_builder.append(e);
+        }
+
+        data_array_builder.append(pair.second);
+        keys_array_builder.append(key_array_builder);
+    }
+
+    for(auto &id : containers_id){
+        containers_id_array_builder.append(id);
     }
 
     document.append(
-        bsoncxx::builder::basic::kvp("key", key_array_builder), 
-        bsoncxx::builder::basic::kvp("data", data)
+        bsoncxx::builder::basic::kvp("keys", keys_array_builder), 
+        bsoncxx::builder::basic::kvp("data", data_array_builder),
+        bsoncxx::builder::basic::kvp("containers_id", containers_id_array_builder)
     );
 }
 
 void Container::load(const bsoncxx::v_noabi::document::element& document_reader){
-	size_t c = 0;
-    
-    for (auto&& e : document_reader["key"].get_array().value) {
-        key.push_back((double)e.get_double());
-        c++;
-    
+
+    size_t counter = 0;
+    for(auto &key_array : document_reader["keys"].get_array().value){
+        std::vector<double> key;
+
+        for(auto &e : key_array.get_array().value){
+            key.push_back((double)e.get_double());
+        }
+
+        data.push_back(std::make_pair(key, (std::string)document_reader["data"][counter].get_utf8().value));
+        counter++;
     }
-    data = (std::string)document_reader["data"].get_utf8().value;
-}
 
-std::vector<double> Container::get_key(){
-	return key;
-}
-
-std::string Container::get_data(){
-	return data;
+    for(auto &id : document_reader["containers_id"].get_array().value){
+        containers_id.push_back((std::string)id.get_utf8().value);
+    }
 }
 
 
-void Container::set_key(const std::vector<double>& key_){
-	key = key_;
+std::vector<std::pair<std::vector<double>, std::string>> Container::get_data(){
+    return data;
 }
 
+std::vector<std::string> Container::get_containers_id(){
+    return containers_id;
+}
 
-void Container::set_data(const std::string& data_){
-	data = data_;
+void Container::set_data(const std::vector<std::pair<std::vector<double>, std::string>>& data_){
+    data = data_;
+}
+
+void Container::set_containers_id(const std::vector<std::string> &containers_id_){
+    containers_id = containers_id_;
 }

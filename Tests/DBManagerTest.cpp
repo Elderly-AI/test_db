@@ -39,9 +39,10 @@ TEST(DBManagerTest, InitTest){
 
 TEST_F(TestDBManager, GetFreeContainerTest){
 	Container *empty_container;
-	EXPECT_NO_THROW(empty_container = db_manager->get_free_container());
-	EXPECT_EQ(empty_container->get_key(), std::vector<double>{});
-	EXPECT_EQ(empty_container->get_data(), "");
+	std::vector<std::pair<std::vector<double>, std::string>> empty_data;
+	EXPECT_NO_THROW(empty_container = (Container*)db_manager->get_free_container());
+	EXPECT_EQ(empty_container->get_data(), empty_data);
+	EXPECT_EQ(empty_container->get_containers_id(), std::vector<std::string>{});
 
 	delete empty_container;
 }
@@ -55,32 +56,33 @@ TEST_F(TestDBManager, InvalidSaveLoadContainerTest){
 
 TEST_F(TestDBManager, SaveLoadContainerTest){
 	Container *container;
-	EXPECT_NO_THROW(container = db_manager->get_free_container());
+	EXPECT_NO_THROW(container = (Container*)db_manager->get_free_container());
 	
-	std::vector<double> key{10.123013323, 1283.124235345, 4.345341236, 5.3453454234, 38.1233993};
-	std::string data = "https://vk.com/id1234";
+	std::vector<std::pair<std::vector<double>, std::string>> data = {
+		std::make_pair(std::vector<double>{1,2,3}, "1"),
+		std::make_pair(std::vector<double>{3,2,1}, "3")
+	};
+	std::vector<std::string> id = {"1", "2", "3"};
 
-	EXPECT_NO_THROW(container->set_key(key));
 	EXPECT_NO_THROW(container->set_data(data));
+	EXPECT_NO_THROW(container->set_containers_id(id));
 
-	EXPECT_EQ(key, container->get_key());
-   	EXPECT_EQ(data, container->get_data());
+	EXPECT_EQ(data, container->get_data());
+   	EXPECT_EQ(id, container->get_containers_id());
 
    	EXPECT_NO_THROW(db_manager->save_container(container));
 
    	std::string container_id = container->id;
 
    	Container *loaded_container;
-   	EXPECT_NO_THROW(loaded_container = db_manager->get_container(container_id));
+   	EXPECT_NO_THROW(loaded_container = (Container*)db_manager->get_container(container_id));
 
-   	EXPECT_EQ(key, loaded_container->get_key());
    	EXPECT_EQ(data, loaded_container->get_data());
+   	EXPECT_EQ(id, loaded_container->get_containers_id());
 
    	delete container;
    	delete loaded_container;
 }
-
-
 
 int main(int argc, char **argv){
     testing::InitGoogleTest(&argc, argv);

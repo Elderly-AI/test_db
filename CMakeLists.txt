@@ -36,6 +36,8 @@ set (HEADERS
 	Base/BaseDBManager.h
 	Base/BaseSearchEngine.h
 	Base/BaseDB.h
+	Base/BaseComporator.h
+	Base/BaseMetrificator.h
 
 	KD/Container.h
 	KD/DB.h
@@ -48,6 +50,8 @@ set (SOURCES
 	Base/BaseContainer.cpp
 	Base/BaseDataStructure.cpp
 	Base/BaseSearchEngine.cpp
+	Base/BaseComporator.cpp
+	Base/BaseMetrificator.cpp
 
 	KD/Container.cpp
 	KD/DB.cpp
@@ -64,7 +68,7 @@ set (DB_TEST Tests/DBTest.cpp)
 
 include_directories(${DIRECTORIES})
 
-add_library (${PROJECT} STATIC ${HEADERS} ${SOURCES})
+add_library (${PROJECT} SHARED ${HEADERS} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBMONGOCXX_LIBRARIES})
 target_link_libraries(${PROJECT} ${LIBBSONCXX_LIBRARIES})
 

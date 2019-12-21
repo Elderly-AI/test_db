@@ -1,0 +1,6 @@
+runContainerTest 66 9.41537e-05
+runDBManagerTest 44 0.000254068
+runKDTreeTest 31 0.0539979
+runSearchEngineTest 5 0.190141
+runDBTest 4 0.00260872
+---

@@ -11,11 +11,16 @@ public:
 	DB(mongocxx::v_noabi::collection conection);
 	~DB();
 
-	void add(const std::vector<double>& key, const std::string& data);
+	void add(const std::vector<double>& key, const std::string& data, BaseComporator *cmp);
+	
+	void set_max_containers_count(const size_t &max_containers_count);
+	size_t get_max_containers_count();
 
-	SearchEngine *search_engine;	
+	void set_kd_tree_key(std::string kd_tree_key);
+	std::string get_kd_tree_key();
 
 private:
-	DBManager *db_manager;
-	KDTree *data_structure;
+
+	size_t max_containers_count = 3;
+	std::string kd_tree_key;
 };

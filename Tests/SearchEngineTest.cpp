@@ -7,6 +7,8 @@
 #include "DBManager.h"
 #include "KDTree.h"
 #include "SearchEngine.h"
+#include "BaseComporator.h"
+#include "BaseMetrificator.h"
 
 mongocxx::instance inst{};
 mongocxx::client conn{mongocxx::uri{}};
@@ -37,11 +39,14 @@ void TestSearchEngine::SetUp(){
 
 	collection = conn["testdb"]["testcollection"];
 	db_manager = new DBManager(collection);
-	kd_tree = new KDTree("...", db_manager);
+	kd_tree = new KDTree("...", db_manager, 3);
 	search_engine = new SearchEngine(kd_tree, db_manager);
 
+	BaseComporator cmp;
+
 	for(auto &key : test_keys){
-		kd_tree->add(key, std::to_string(key[0]));
+
+		kd_tree->add(key, std::to_string(key[0]), &cmp);
 	}
 }
 
@@ -115,7 +120,7 @@ TEST(KDTreeTest, InitTest){
 	KDTree *kd_tree;
 
 	EXPECT_NO_THROW(db_manager = new DBManager(collection));
-	EXPECT_NO_THROW(kd_tree = new KDTree("...", db_manager));
+	EXPECT_NO_THROW(kd_tree = new KDTree("...", db_manager, 3));
 	EXPECT_NO_THROW(SearchEngine search_engine(kd_tree, db_manager));
 
 	delete db_manager;
@@ -126,7 +131,10 @@ TEST(KDTreeTest, InitTest){
 TEST_F(TestSearchEngine, BestMatchTest){
 	for(size_t c = 0; c < neighbour_search_tests.size(); ++c){
 		std::string search_engine_tree_answer;
-		EXPECT_NO_THROW(search_engine_tree_answer = search_engine->get_best_match(neighbour_search_tests[c])[0]);
+		BaseComporator cmp = BaseComporator();
+		BaseMetrificator mth= BaseMetrificator();
+
+		EXPECT_NO_THROW(search_engine_tree_answer = search_engine->get_best_match(neighbour_search_tests[c], &cmp, &mth)[0]);
 		EXPECT_EQ(search_engine_tree_answer, neighbour_search_answers[c]);
 	}
 }

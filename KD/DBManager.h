@@ -19,8 +19,8 @@ public:
 
 	void save_container(BaseContainer *container_ptr);
 
-	Container* get_container(const std::string &id);
-	Container* get_free_container();
+	BaseContainer* get_container(const std::string &id);
+	BaseContainer* get_free_container();
 
 private:
 

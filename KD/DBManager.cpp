@@ -8,7 +8,6 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 
-
 #include "DBManager.h"
 #include "Container.h"
 #include "BaseContainer.h"
@@ -43,13 +42,12 @@ void DBManager::save_container(BaseContainer *container){
         )
     );
 
-
     if(found_container){
         collection.update_one(found_container.value().view(), save_doc.view());
     }
 }
 
-Container* DBManager::get_container(const std::string &id){
+BaseContainer* DBManager::get_container(const std::string &id){
     bsoncxx::stdx::optional<bsoncxx::document::value> container_doc = collection.find_one(
         bsoncxx::builder::basic::make_document(
             bsoncxx::builder::basic::kvp(
@@ -61,7 +59,6 @@ Container* DBManager::get_container(const std::string &id){
     Container *container(new Container(id));
 
     if(container_doc){
-
         container->load(container_doc->view()["container"]);
     }
 
@@ -69,7 +66,7 @@ Container* DBManager::get_container(const std::string &id){
 }
 
 
-Container* DBManager::get_free_container(){
+BaseContainer* DBManager::get_free_container(){
     bsoncxx::builder::stream::document document{};
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection.insert_one(document.view());
     std::string id = result.value().inserted_id().get_oid().value.to_string();
