@@ -6,9 +6,10 @@
 #include "SearchEngine.h"
 #include "DBManager.h"
 
+
 class DB: public BaseDB{
 public:
-	DB(mongocxx::v_noabi::collection conection);
+	DB(mongocxx::v_noabi::collection collection, size_t max_containers_count_, std::string kd_tree_key_ = "");
 	~DB();
 
 	void add(const std::vector<double>& key, const std::string& data, BaseComporator *cmp);

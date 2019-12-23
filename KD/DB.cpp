@@ -1,24 +1,26 @@
+#include <utility>
+
 #include "BaseDB.h"
 #include "KDTree.h"
 #include "SearchEngine.h"
-#include "BaseComporator.h"
+#include "BaseComporator.h" 
+#include "BaseDataStructure.h"
 #include "DBManager.h"
 #include "DB.h"
 
-DB::DB(mongocxx::v_noabi::collection collection){
+DB::DB(mongocxx::v_noabi::collection collection, size_t max_containers_count_, std::string kd_tree_key_)
+:kd_tree_key(kd_tree_key_), max_containers_count(max_containers_count_){
 
 	db_manager = new DBManager(collection);
 
 	if(kd_tree_key.empty()){
-		data_structure = (KDTree*)db_manager->get_free_container();
+		data_structure = (BaseDataStructure*)((DBManager*)db_manager)->get_free_kd_tree(((DBManager*)db_manager), max_containers_count);
 		kd_tree_key = data_structure->id;
 	}
 	else{
-		data_structure = (KDTree*)db_manager->get_container(kd_tree_key);
+		data_structure = (BaseDataStructure*)((DBManager*)db_manager)->get_kd_tree(kd_tree_key, ((DBManager*)db_manager), max_containers_count);
 	}
 
-	((KDTree*)data_structure)->db_manager = db_manager;
-	((KDTree*)data_structure)->max_containers_count = max_containers_count;
 	search_engine = new SearchEngine((KDTree*)data_structure, (DBManager*)db_manager);
 }
 
@@ -30,6 +32,7 @@ DB::~DB(){
 
 void DB::add(const std::vector<double>& key, const std::string& data, BaseComporator *cmp){
 	((KDTree*)data_structure)->add(key, data, cmp);
+	((DBManager*)db_manager)->save_container(data_structure);
 }
 
 void DB::set_max_containers_count(const size_t &max_containers_count_){

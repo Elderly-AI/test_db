@@ -79,6 +79,7 @@ void KDTree::save(bsoncxx::builder::basic::sub_document &document){
 
 void KDTree::load(const bsoncxx::v_noabi::document::element& document_reader){
 	root_container_id = (std::string)document_reader["root_container_id"].get_utf8().value;
+	std::cout << "root_container_id" << root_container_id << "\n";
 }
 
 void KDTree::split_container(std::string container_id){
